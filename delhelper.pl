@@ -19,18 +19,10 @@ use DBI;
 use XML::DOM::XPath;
 use LWP::UserAgent;
 
-#my $db = DBI->connect('dbi:SQLite:dbname=db', '', '');
 my $schema = Schema->connect('dbi:SQLite:dbname=db', '', '');
 
-#my @posts = $schema->resultset('Post')->all;
 my @posts = getUnchecked2(10);
-my $i = 0;
-foreach my $p ( @posts ) {
-    print $p->href . "\n";
-#    if ( $i++ > 10 ) {
-#        last;
-#    }
-}
+check(@posts);
 
 sub getUnchecked2 {
     my $limit = shift || 100;
@@ -75,8 +67,20 @@ sub getUnchecked {
 }
 
 sub check {
+    my $agent = LWP::UserAgent->new;
+    $agent->agent('Link Checker/0.10');
+    $agent->from('jrowe@jrowe.org');
+    $agent->max_redirect(0);
+    $agent->timeout(5);
+
     foreach ( @_ ) {
-        
+        my $href = $_->href;
+        my $response = $agent->head($href);
+        $schema->resultset('Response')->create({
+            href        => $href,
+            code        => $response->code,
+            seconds1970 => time,
+        });
     }
 }
 
