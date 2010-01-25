@@ -5,6 +5,7 @@ package Schema;
 use base qw( DBIx::Class::Schema::Loader );
 
 __PACKAGE__->loader_options(
+#    debug => 1
 );
 
 1;
@@ -21,12 +22,61 @@ use LWP::UserAgent;
 #my $db = DBI->connect('dbi:SQLite:dbname=db', '', '');
 my $schema = Schema->connect('dbi:SQLite:dbname=db', '', '');
 
-my @posts = $schema->resultset('Post')->all;
+#my @posts = $schema->resultset('Post')->all;
+my @posts = getUnchecked2(10);
 my $i = 0;
 foreach my $p ( @posts ) {
     print $p->href . "\n";
-    if ( $i++ > 10 ) {
-        last;
+#    if ( $i++ > 10 ) {
+#        last;
+#    }
+}
+
+sub getUnchecked2 {
+    my $limit = shift || 100;
+
+    my @unchecked;
+
+    my @posts = $schema->resultset('Post')->search(undef, {
+        order_by => 'random()'
+    });
+
+    foreach my $post ( @posts ) {
+        my $checked = $schema->resultset('Response')->search({
+            href => $post->href,
+        })->next;
+
+        unless ( $checked ) {
+            push @unchecked, $post;
+        }
+
+        if ( @unchecked > $limit ) {
+            last;
+        }
+    }
+
+    return @unchecked;
+}
+
+sub getUnchecked {
+    my ( $limit ) = @_;
+
+    #First trying a subquery that will be basically empty
+    my $rs = $schema->resultset('Response')->search({
+        href => 'http://example.com/',
+    });
+
+    return $schema->resultset('Post')->search(
+#        href => 'http://slashdot.org/',
+        href => {
+            'NOT IN' => $rs->get_column('href')->as_query
+        },
+    );
+}
+
+sub check {
+    foreach ( @_ ) {
+        
     }
 }
 
