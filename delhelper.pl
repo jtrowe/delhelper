@@ -119,22 +119,15 @@ sub load {
 
     my $years = {};
 
-    my $sql = sprintf(
-            'INSERT INTO post ( %s ) VALUES ( %s )',
-            join(', ', @COLS), join(', ', ( map { '?' } @COLS )));
-    #print $sql . "\n";
-    my $sthI = $db->prepare($sql);
-
     my @nodes = $doc->findnodes('/posts/post');
     my $i = 0;
     foreach ( @nodes ) {
-        my @vals;
+        my $args;
         foreach my $c ( @COLS ) {
-            push @vals, $_->getAttribute($c);
+            $args->{$c} = $_->getAttribute($c);
         }
 
-        $sthI->execute(@vals);
-
+        $schema->resultset('Post')->create($args);
     }
 }
 
