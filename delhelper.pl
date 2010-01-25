@@ -21,7 +21,7 @@ use LWP::UserAgent;
 
 my $schema = Schema->connect('dbi:SQLite:dbname=db', '', '');
 
-my @posts = getUnchecked2(10);
+my @posts = getUnchecked2(100);
 check(@posts);
 
 sub getUnchecked2 {
@@ -76,11 +76,65 @@ sub check {
     foreach ( @_ ) {
         my $href = $_->href;
         my $response = $agent->head($href);
+        my $code = $response->code;
         $schema->resultset('Response')->create({
             href        => $href,
-            code        => $response->code,
+            code        => $code,
             seconds1970 => time,
         });
+
+        print $code . ' ' . $href . "\n";
+    }
+}
+
+sub file {
+    my $dir = join '/', $ENV{'HOME'},
+            qw( Desktop Documents Backups delicious );
+
+    my $DIR;
+    opendir $DIR, $dir;
+    my @files = map { join '/', $dir, $_ } grep { m/\.xml$/ } readdir $DIR;
+    closedir $DIR;
+
+    return $files[0];
+}
+
+sub load {
+    my @COLS = qw( href time hash description tag extended meta );
+#    $db->do(q|
+#        CREATE TABLE post (
+#            href TEXT,
+#            time TEXT,
+#            hash TEXT,
+#            description TEXT,
+#            tag TEXT,
+#            extended TEXT,
+#            meta TEXT
+#        );
+#    |);
+
+    my $file = file();
+    my $parser = XML::DOM::Parser->new;
+    my $doc = $parser->parsefile($file);
+
+    my $years = {};
+
+    my $sql = sprintf(
+            'INSERT INTO post ( %s ) VALUES ( %s )',
+            join(', ', @COLS), join(', ', ( map { '?' } @COLS )));
+    #print $sql . "\n";
+    my $sthI = $db->prepare($sql);
+
+    my @nodes = $doc->findnodes('/posts/post');
+    my $i = 0;
+    foreach ( @nodes ) {
+        my @vals;
+        foreach my $c ( @COLS ) {
+            push @vals, $_->getAttribute($c);
+        }
+
+        $sthI->execute(@vals);
+
     }
 }
 
