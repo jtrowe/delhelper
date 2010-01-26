@@ -16,13 +16,28 @@ use strict;
 use warnings;
 
 use DBI;
+use Getopt::Long;
 use XML::DOM::XPath;
 use LWP::UserAgent;
 
 my $schema = Schema->connect('dbi:SQLite:dbname=db', '', '');
 
-my @posts = getUnchecked2(100);
+my %opts = (
+    report => 0,
+);
+
+GetOptions(
+    'report=s' => \$opts{'report'},
+);
+
+if ( $opts{'report'} ) {
+    report($opts{'report'}, 30);
+}
+
+my @posts = getUnchecked2(200);
 check(@posts);
+
+load();
 
 sub getUnchecked2 {
     my $limit = shift || 100;
@@ -48,6 +63,33 @@ sub getUnchecked2 {
     }
 
     return @unchecked;
+}
+
+sub getChecked2 {
+    my $limit = shift || 100;
+
+    my @checked;
+
+    my @responses = $schema->resultset('Response')->search(undef,
+    {
+        limit    => $limit,
+        order_by => 'random()'
+    }
+    )->all;
+
+    foreach my $response ( @responses ) {
+        if ( $response->code eq '200' ) {
+            next;
+        }
+
+        push @checked, $response;
+
+        if ( @checked > $limit ) {
+            last;
+        }
+    }
+
+    return @checked;
 }
 
 sub getUnchecked {
@@ -131,137 +173,31 @@ sub load {
     }
 }
 
-__END__
-load();
+sub report {
+    my $file = shift;
+    my $limit = shift;
 
-#$db->do(q|
-#    CREATE TABLE post (
-#        href TEXT NOT NULL UNIQUE,
-#        year INT NOT NULL,
-#        month INT NOT NULL
-#    );
-#    CREATE TABLE processed (
-#        href TEXT NOT NULL UNIQUE
-#    );
-#|);
-#my $sthIns = $db->prepare(
-#        q|INSERT INTO post ( href, year, month ) VALUES ( ?, ?, ? )|);
-#unless ( $sthIns ) {
-#    print STDERR 'ERROR: Cannot create prepared statement: '
-#            . $db->errstr . "\n";
-#
-#    exit 1;
-#}
+    my $OUT;
+    open $OUT, '>', $file;
+    print $OUT q|<html><body><ul>|;
+    my @responses = getChecked2($limit);
+    foreach my $response ( @responses ) {
+        my $code = $response->code;
+        my $href = $response->href;
+        print $OUT '<li>';
+        print $OUT $code . ' ';
+        print $OUT '<a href="' . $href . '">' . $href . '</a>' . "\n";
 
-my $sthGetCount = $db->prepare(
-        q|SELECT count(*) FROM post WHERE href NOT IN (
-            SELECT href FROM processed
-          )
-        |);
-my $sthInsProcessed = $db->prepare(
-        q|INSERT INTO processed ( href ) VALUES ( ? )|);
+        my $url = 'https://jrowe:m0j0ni%on@api.del.icio.us/v1/posts/delete?url='
+                . $href;
+        print $OUT '  <a href="' . $url . '">Delete</a>' . "\n";
 
-#dump();
+        print $OUT '</li>';
 
-
-$db->disconnect;
-
-sub file {
-    my $dir = join '/', $ENV{'HOME'},
-            qw( Desktop Documents Backups delicious );
-
-    my $DIR;
-    opendir $DIR, $dir;
-    my @files = map { join '/', $dir, $_ } grep { m/\.xml$/ } readdir $DIR;
-    closedir $DIR;
-
-    return $files[0];
-}
-
-sub load {
-    $db->do(q|
-        DROP TABLE post;
-    |);
-    my @COLS = qw( href time hash description tag extended meta );
-    $db->do(q|
-        CREATE TABLE post (
-            href TEXT,
-            time TEXT,
-            hash TEXT,
-            description TEXT,
-            tag TEXT,
-            extended TEXT,
-            meta TEXT
-        );
-    |);
-
-    my $file = file();
-    my $parser = XML::DOM::Parser->new;
-    my $doc = $parser->parsefile($file);
-
-    my $years = {};
-
-    my $sql = sprintf(
-            'INSERT INTO post ( %s ) VALUES ( %s )',
-            join(', ', @COLS), join(', ', ( map { '?' } @COLS )));
-    #print $sql . "\n";
-    my $sthI = $db->prepare($sql);
-
-    my @nodes = $doc->findnodes('/posts/post');
-    my $i = 0;
-    foreach ( @nodes ) {
-        my @vals;
-        foreach my $c ( @COLS ) {
-            push @vals, $_->getAttribute($c);
-        }
-
-        $sthI->execute(@vals);
-
+        $schema->resultset('Processed')->find_or_create({
+            href => $href,
+        });
     }
-}
-
-sub dump {
-    $sthGetCount->execute;
-    my ( $count ) = $sthGetCount->fetchrow_array;
-    print $count . ' unprocessed hrefs.' . "\n";
-
-    my $min = 20;
-    my $max = 100;
-
-    my $limit = $count / 10;
-    if ( $limit < $min ) {
-        $limit = $min;
-    }
-    elsif ( $limit > $max ) {
-        $limit = $max;
-    }
-
-    my @ltime = localtime time;
-    my $cyear = sprintf '%02d', $ltime[5];
-    my $cmonth = 1900 + $ltime[4];
-
-    my $sthGetHrefs = $db->prepare(
-            q|SELECT href FROM post WHERE href NOT IN (
-                SELECT href FROM processed
-              )
-              AND month != ? AND year != ?
-              ORDER BY random()
-              LIMIT ?
-            |);
-
-    $sthGetHrefs->execute($limit, $cmonth, $cyear);
-
-    print q|<html><body><ul>|;
-    while ( my ( $href ) = $sthGetHrefs->fetchrow_array ) {
-        print '<li>';
-        print '<a href="' . $href . '">' . $href . '</a>' . "\n";
-        print '</li>';
-
-        my $url = qq|https://api.del.icio.us/v1/posts/delete?url=$href|;
-        print '  <a href="' . $url . '">Delete</a>' . "\n";
-
-        $sthInsProcessed->execute($href);
-    }
-    print q|</ul></body></html>|;
+    print $OUT q|</ul></body></html>|;
 }
 
