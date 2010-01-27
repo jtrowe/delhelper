@@ -30,7 +30,7 @@ my %opts = (
 
 GetOptions(
     'check=i'  => \$opts{'check'},
-    'load!'  => \$opts{'load'},
+    'load!'    => \$opts{'load'},
     'report=s' => \$opts{'report'},
 );
 
