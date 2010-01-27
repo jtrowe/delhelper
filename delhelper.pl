@@ -23,10 +23,14 @@ use LWP::UserAgent;
 my $schema = Schema->connect('dbi:SQLite:dbname=db', '', '');
 
 my %opts = (
+    check => 200,
+    load => 0,
     report => 0,
 );
 
 GetOptions(
+    'check=i'  => \$opts{'check'},
+    'load!'  => \$opts{'load'},
     'report=s' => \$opts{'report'},
 );
 
@@ -34,13 +38,15 @@ if ( $opts{'report'} ) {
     report($opts{'report'}, 30);
 }
 
-my @posts = getUnchecked2(200);
+my @posts = getUnchecked2($opts{'check'});
 check(@posts);
 
-load();
+if ( $opts{'load'} ) {
+    load();
+}
 
 sub getUnchecked2 {
-    my $limit = shift || 100;
+    my $limit = shift;
 
     my @unchecked;
 
@@ -57,7 +63,7 @@ sub getUnchecked2 {
             push @unchecked, $post;
         }
 
-        if ( @unchecked > $limit ) {
+        if ( ( $limit ) && ( @unchecked >= $limit ) ) {
             last;
         }
     }
@@ -114,6 +120,8 @@ sub check {
     $agent->from('jrowe@jrowe.org');
     $agent->max_redirect(0);
     $agent->timeout(5);
+
+    print 'Checking ' . scalar(@_) . ' posts.' . "\n";
 
     foreach ( @_ ) {
         my $href = $_->href;
