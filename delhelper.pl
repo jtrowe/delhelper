@@ -16,6 +16,7 @@ use strict;
 use warnings;
 
 use DBI;
+use File::Basename;
 use Getopt::Long;
 use XML::DOM::XPath;
 use LWP::UserAgent;
@@ -38,8 +39,10 @@ if ( $opts{'report'} ) {
     report($opts{'report'}, 30);
 }
 
-my @posts = getUnchecked2($opts{'check'});
-check(@posts);
+if ( $opts{'check'} ) {
+    my @posts = getUnchecked2($opts{'check'});
+    check(@posts);
+}
 
 if ( $opts{'load'} ) {
     load();
@@ -143,27 +146,29 @@ sub file {
 
     my $DIR;
     opendir $DIR, $dir;
-    my @files = map { join '/', $dir, $_ } grep { m/\.xml$/ } readdir $DIR;
+    my @files = grep { m/\.xml$/ } readdir $DIR;
     closedir $DIR;
 
-    return $files[0];
+    my $file = $schema->resultset('File')->search({
+        file => $files[0],
+        processed => 1,
+    })->next;
+    if ( $file ) {
+        print 'File ' . $files[0] . ' already processed.' . "\n";
+        return;
+    }
+
+    return join '/', $dir, $files[0];
 }
 
 sub load {
     my @COLS = qw( href time hash description tag extended meta );
-#    $db->do(q|
-#        CREATE TABLE post (
-#            href TEXT,
-#            time TEXT,
-#            hash TEXT,
-#            description TEXT,
-#            tag TEXT,
-#            extended TEXT,
-#            meta TEXT
-#        );
-#    |);
 
     my $file = file();
+
+    unless ( $file ) {
+        return;
+    }
     my $parser = XML::DOM::Parser->new;
     my $doc = $parser->parsefile($file);
 
@@ -179,6 +184,13 @@ sub load {
 
         $schema->resultset('Post')->create($args);
     }
+
+    my ( $basename ) = fileparse($file);
+
+    $schema->resultset('File')->create({
+        file => $basename,
+        processed => 1,
+    });
 }
 
 sub report {
