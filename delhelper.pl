@@ -23,6 +23,27 @@ use LWP::UserAgent;
 
 my $schema = Schema->connect('dbi:SQLite:dbname=db', '', '');
 
+if ( 0 ) {
+my %href;
+my @cols = qw( href teim hash description tag extended meta );
+my $i = 1;
+foreach my $p ( $schema->resultset('Post0')->all ) {
+    unless ( $href{$p->href} ) {
+        print $i++ . ' : ' . $p->href . "\n";
+        $href{$p->href} = $schema->resultset('Post')->create({
+            href => $p->href,
+            time => $p->time,
+            hash => $p->hash,
+            description => $p->description,
+            tag => $p->tag,
+            extended => $p->extended,
+            meta => $p->meta,
+        });
+    }
+}
+exit;
+}
+
 my %opts = (
     check => 200,
     load => 0,
@@ -93,7 +114,7 @@ sub getChecked2 {
 
         push @checked, $response;
 
-        if ( @checked > $limit ) {
+        if ( @checked >= $limit ) {
             last;
         }
     }
@@ -201,6 +222,9 @@ sub report {
     open $OUT, '>', $file;
     print $OUT q|<html><body><ul>|;
     my @responses = getChecked2($limit);
+
+    print 'Found ' . scalar(@responses) . ' posts for the report.' . "\n";
+
     foreach my $response ( @responses ) {
         my $code = $response->code;
         my $href = $response->href;
@@ -211,6 +235,8 @@ sub report {
         my $url = 'https://jrowe:m0j0ni%on@api.del.icio.us/v1/posts/delete?url='
                 . $href;
         print $OUT '  <a href="' . $url . '">Delete</a>' . "\n";
+
+#http://delicious.com/url/d261045885c45eaaaa18ce7ebeae1324
 
         print $OUT '</li>';
 
