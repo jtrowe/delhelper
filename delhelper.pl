@@ -86,8 +86,9 @@ sub getChecked2 {
     }
     )->all;
 
+    my %SKIP = map { $_ => 1 } qw( 200  301 302 );
     foreach my $response ( @responses ) {
-        if ( $response->code eq '200' ) {
+        if ( $SKIP{$response->code} ) {
             next;
         }
 
