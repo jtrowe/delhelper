@@ -23,27 +23,6 @@ use LWP::UserAgent;
 
 my $schema = Schema->connect('dbi:SQLite:dbname=db', '', '');
 
-if ( 0 ) {
-my %href;
-my @cols = qw( href teim hash description tag extended meta );
-my $i = 1;
-foreach my $p ( $schema->resultset('Post0')->all ) {
-    unless ( $href{$p->href} ) {
-        print $i++ . ' : ' . $p->href . "\n";
-        $href{$p->href} = $schema->resultset('Post')->create({
-            href => $p->href,
-            time => $p->time,
-            hash => $p->hash,
-            description => $p->description,
-            tag => $p->tag,
-            extended => $p->extended,
-            meta => $p->meta,
-        });
-    }
-}
-exit;
-}
-
 my %opts = (
     check => 200,
     load => 0,
@@ -228,6 +207,11 @@ sub report {
     foreach my $response ( @responses ) {
         my $code = $response->code;
         my $href = $response->href;
+
+        my $post = $schema->resultset('Post')->search({
+            href => $href,
+        })->next;
+
         print $OUT '<li>';
         print $OUT $code . ' ';
         print $OUT '<a href="' . $href . '">' . $href . '</a>' . "\n";
@@ -236,7 +220,8 @@ sub report {
                 . $href;
         print $OUT '  <a href="' . $url . '">Delete</a>' . "\n";
 
-#http://delicious.com/url/d261045885c45eaaaa18ce7ebeae1324
+        $url = 'http://delicious.com/url/' . $post->hash;
+        print $OUT '  <a href="' . $url . '">Info</a>' . "\n";
 
         print $OUT '</li>';
 
