@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<posts user="jrowe" tag="Perl">
+  <post href="http://search.cpan.org/~hkclark/Catalyst-Manual/" hash="a5f379225a9db481b901cf67974b1bd5" description="Kennedy Clark / Catalyst-Manual - search.cpan.org" tag="Perl Catalyst Programming Manual Documentation" time="2010-04-25T00:24:36Z" extended=""/>
+  <post href="http://search.cpan.org/~bobtfish/Catalyst-Runtime/" hash="c59a324a26c4e631e86c7a2f65f98d46" description="Tomas Doran / Catalyst-Runtime - search.cpan.org" tag="Perl Web Programming Framework Library" time="2010-04-25T00:23:49Z" extended=""/>
+  <post href="http://search.cpan.org/~bayside/Catalyst-Plugin-CRUD/" hash="04c2f98ca7cafde05da3c7cedacdaa81" description="Jun Shimizu / Catalyst-Plugin-CRUD - search.cpan.org" tag="Perl Catalyst Programming Library" time="2010-04-25T00:22:36Z" extended=""/>
+  <post href="http://search.cpan.org/~dami/DBIx-DataModel/" hash="33ae800e55315b6a30f3f441ed228525" description="Laurent Dami / DBIx-DataModel - search.cpan.org" tag="Perl Database Programming Library" time="2010-04-19T16:45:33Z" extended=""/>
+  <post href="http://search.cpan.org/~tmoertel/Test-LectroTest/" hash="5395dd446a15fb99c22642b08a514328" description="Tom Moertel / Test-LectroTest - search.cpan.org" tag="Perl Testing Programming Library" time="2010-04-18T21:26:40Z" extended=""/>
+  <post href="http://perl-qa.hexten.net/wiki/index.php/Test::FAQ" hash="05c03d7861cd89af4303584de017c450" description="Test::FAQ - Perl QA" tag="Perl Testing Programming FAQ" time="2010-04-18T21:25:22Z" extended=""/>
+  <post href="http://szabgab.com/blog/tags/testing.html" hash="92e8fd1c6d64537ebae6f8ff62a400db" description="blog entries about testing" tag="Perl Testing" time="2010-04-18T21:05:42Z" extended=""/>
+  <post href="http://search.cpan.org/~jrockway/DBICx-Deploy-0.02/lib/DBICx/Deploy.pm" hash="89c78a38d193610b9b392ba5910c38ae" description="DBICx::Deploy - search.cpan.org" tag="Perl Database Programming Library" time="2010-04-18T20:47:49Z" extended=""/>
+  <post href="http://search.cpan.org/~jrockway/DBICx-Deploy/" hash="8bdadbc67706602cbbaf63e7117e6396" description="Jonathan Rockway / DBICx-Deploy - search.cpan.org" tag="Perl Database Programming Library" time="2010-04-18T17:26:58Z" extended=""/>
+  <post href="http://search.cpan.org/~frew/SQL-Abstract/" hash="a39f3d608921e3a6dc242564ecff22ff" description="Arthur Axel &quot;fREW&quot; Schmidt / SQL-Abstract - search.cpan.org" tag="Perl Database Programming Library" time="2010-04-18T17:24:00Z" extended=""/>
+  <post href="http://search.cpan.org/~drolsky/Fey/" hash="b80de61b7390f5cac9d04cb88c38a10c" description="Dave Rolsky / Fey - search.cpan.org" tag="Perl Database Programming Library" time="2010-04-17T17:49:41Z" extended=""/>
+  <post href="http://search.cpan.org/~mlawren/SQL-DB/" hash="7ba22f7e77847023c3f73daeb4a87e81" description="Mark Lawrence / SQL-DB - search.cpan.org" tag="Perl Database Programming Library" time="2010-04-17T17:45:23Z" extended=""/>
+  <post href="http://smolder.sourceforge.net/" hash="74d407029298b4b66b3286e79d35dba3" description="SourceForge.net: Smolder - Project Web Hosting - Open Source Software" tag="Perl CI Build Testing Automation Framework Tool" time="2010-04-14T03:37:28Z" extended=""/>
+  <post href="http://www.slideshare.net/mpeters/smolder-introduction" hash="4a6329241453110de9f49e0cd8fb9b71" description="Smolder Introduction" tag="Perl CI Testing Build Automation Framework Tool" time="2010-04-14T03:36:31Z" extended=""/>
+  <post href="http://www.adobe.com/devnet/acrobat/fdftoolkit.html" hash="376c835e550cbe709fa5ba137947065a" description="Adobe - Acrobat Developer Center - Acrobat Forms Data Format (FDF) Toolkit" tag="PDF Programming Library Perl Java" time="2010-04-13T22:23:43Z" extended=""/>
+</posts>
+<!-- fe01.api.del.ac4.yahoo.net uncompressed Mon Apr 26 10:57:50 PDT 2010 -->
