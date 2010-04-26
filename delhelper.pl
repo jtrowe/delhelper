@@ -289,7 +289,8 @@ sub report {
         print $OUT $code . ' ';
         print $OUT '<a href="' . $href . '">' . $href . '</a>' . "\n";
 
-        my $url = 'https://$username:$password@api.del.icio.us/v1/posts/delete?url='
+        my $url = 'https://' . $username . ':' . $password
+                . '@api.del.icio.us/v1/posts/delete?url='
                 . $href;
         print $OUT '  <a href="' . $url . '">Delete</a>' . "\n";
 
