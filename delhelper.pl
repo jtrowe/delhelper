@@ -28,6 +28,7 @@ package main;
 use strict;
 use warnings;
 
+use Data::Dumper;
 use DBI;
 use File::Basename;
 use Getopt::Long;
@@ -72,7 +73,7 @@ unless ( -e $opts{'db'} ) {
 
 }
 
-my $schema = Schema->connect('dbi:SQLite:dbname=db', '', '');
+my $schema = Schema->connect('dbi:SQLite:dbname=' . $opts{'db'}, '', '');
 
 if ( $opts{'tags'} ) {
     tagReport();
@@ -235,7 +236,15 @@ sub load {
             $args->{$c} = $_->getAttribute($c);
         }
 
-        $schema->resultset('Post')->create($args);
+        my $ok = eval {
+            $schema->resultset('Post')->create($args);
+            1;
+        };
+        if ( ( ! $ok ) || $@ ) {
+            print 'ERROR: Error inserting post [ ' . $@ . ' ]' . "\n";
+            print 'post: ' . Dumper($args) . "\n";
+        }
+
     }
 
     my ( $basename ) = fileparse($file);
