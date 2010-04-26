@@ -1,6 +1,5 @@
 #!/usr/bin/perl
 
-=pod
 =head1 DESCRIPTION
 
 This script loads an XML dump of a users delicious.com bookmarks
@@ -23,6 +22,11 @@ Sample command lines:
 
     List possible plural tags
     perl delhelper.pl --db db --tags
+
+
+=head1 AUTHOR
+
+Joshua T. Rowe <jrowe@jrowe.org>
 
 =cut
 
