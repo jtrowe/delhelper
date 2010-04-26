@@ -37,6 +37,7 @@ use LWP::UserAgent;
 my $username = 'username';
 my $password = 'password';
 my %opts = (
+    db     => 'db',
     check  => 200,
     init   => 0,
     input  => 'sample.xml',
@@ -47,6 +48,7 @@ my %opts = (
 
 
 GetOptions(
+    'db=s'       => \$opts{'db'},
     'init'       => \$opts{'init'},
     'input=s'    => \$opts{'input'},
     'check=i'    => \$opts{'check'},
@@ -58,14 +60,14 @@ GetOptions(
     'password=s' => \$password,
 );
 
-if ( ! ( -e 'db' ) ) {
+unless ( -e $opts{'db'} ) {
     my $tmp = "/tmp/init.sql";
     open(OUT, '>', $tmp) or die($!);
     foreach ( <DATA> ) {
         print OUT;
     }
     close OUT;
-    system("sqlite3 db < $tmp");
+    system("sqlite3 $opts{'db'} < $tmp");
     unlink $tmp;
 
 }
