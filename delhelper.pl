@@ -21,6 +21,9 @@ Sample command lines:
     Create the report (probably will not be any)
     perl delhelper.pl --username $u --password $p --db db --report report.html
 
+    List possible plural tags
+    perl delhelper.pl --db db --tags
+
 =cut
 
 
