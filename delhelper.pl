@@ -1,5 +1,18 @@
 #!/usr/bin/perl
 
+=pod
+=head1 DESCRIPTION
+
+This script loads an XML dump of a users delicious.com bookmarks
+into a database and performs various processes upon it.
+
+It can check link validity.
+It can create a report detailing unreachable links.
+It can create a listing of tags which seem to be plural.
+
+=cut
+
+
 package Schema;
 
 use base qw( DBIx::Class::Schema::Loader );
@@ -21,21 +34,43 @@ use Getopt::Long;
 use XML::DOM::XPath;
 use LWP::UserAgent;
 
-my $schema = Schema->connect('dbi:SQLite:dbname=db', '', '');
-
+my $username = 'username';
+my $password = 'password';
 my %opts = (
-    check => 200,
-    load => 0,
+    check  => 200,
+    init   => 0,
+    input  => 'sample.xml',
+    load   => 0,
     report => 0,
-    tags => 0,
+    tags   => 0,
 );
+
 
 GetOptions(
-    'check=i'  => \$opts{'check'},
-    'load!'    => \$opts{'load'},
-    'report=s' => \$opts{'report'},
-    'tags'     => \$opts{'tags'},
+    'init'       => \$opts{'init'},
+    'input=s'    => \$opts{'input'},
+    'check=i'    => \$opts{'check'},
+    'load!'      => \$opts{'load'},
+    'report=s'   => \$opts{'report'},
+    'tags'       => \$opts{'tags'},
+
+    'username=s' => \$username,
+    'password=s' => \$password,
 );
+
+if ( ! ( -e 'db' ) ) {
+    my $tmp = "/tmp/init.sql";
+    open(OUT, '>', $tmp) or die($!);
+    foreach ( <DATA> ) {
+        print OUT;
+    }
+    close OUT;
+    system("sqlite3 db < $tmp");
+    unlink $tmp;
+
+}
+
+my $schema = Schema->connect('dbi:SQLite:dbname=db', '', '');
 
 if ( $opts{'tags'} ) {
     tagReport();
@@ -224,7 +259,7 @@ sub report {
         print $OUT $code . ' ';
         print $OUT '<a href="' . $href . '">' . $href . '</a>' . "\n";
 
-        my $url = 'https://jrowe:m0j0ni%on@api.del.icio.us/v1/posts/delete?url='
+        my $url = 'https://$username:$password@api.del.icio.us/v1/posts/delete?url='
                 . $href;
         print $OUT '  <a href="' . $url . '">Delete</a>' . "\n";
 
@@ -258,4 +293,13 @@ sub tagReport {
     print join('    ', @endInS) . "\n";
 
 }
+
+__DATA__
+CREATE TABLE file ( file text, processed int default 0 );
+CREATE TABLE post ( id integer primary key autoincrement, href not null
+unique, time text, hash text, description text, tag text, extended text,
+meta text );
+CREATE TABLE processed ( href text primary key );
+CREATE TABLE response ( id integer primary key autoincrement, href text,
+code integer, seconds1970 integer );
 
