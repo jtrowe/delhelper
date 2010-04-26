@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <posts user="jrowe" tag="Perl">
+  <post href="http://fake.com/url/is/not/here" hash="b5f379225a9db481b901cf67974b1bd5" description="A fake post with a fake url" tag="Perls Catalyst Programming Manual Documentation" time="2010-04-25T00:24:36Z" extended=""/>
   <post href="http://search.cpan.org/~hkclark/Catalyst-Manual/" hash="a5f379225a9db481b901cf67974b1bd5" description="Kennedy Clark / Catalyst-Manual - search.cpan.org" tag="Perl Catalyst Programming Manual Documentation" time="2010-04-25T00:24:36Z" extended=""/>
   <post href="http://search.cpan.org/~bobtfish/Catalyst-Runtime/" hash="c59a324a26c4e631e86c7a2f65f98d46" description="Tomas Doran / Catalyst-Runtime - search.cpan.org" tag="Perl Web Programming Framework Library" time="2010-04-25T00:23:49Z" extended=""/>
   <post href="http://search.cpan.org/~bayside/Catalyst-Plugin-CRUD/" hash="04c2f98ca7cafde05da3c7cedacdaa81" description="Jun Shimizu / Catalyst-Plugin-CRUD - search.cpan.org" tag="Perl Catalyst Programming Library" time="2010-04-25T00:22:36Z" extended=""/>

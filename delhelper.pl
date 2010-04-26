@@ -10,6 +10,17 @@ It can check link validity.
 It can create a report detailing unreachable links.
 It can create a listing of tags which seem to be plural.
 
+Sample command lines:
+
+    Load sample.xml into the SQLite database 'db'.
+    perl delhelper.pl --db db --input sample.xml --load
+
+    Check the links.
+    perl delhelper.pl --db db --check 20
+
+    Create the report (probably will not be any)
+    perl delhelper.pl --username $u --password $p --db db --report report.html
+
 =cut
 
 
@@ -39,7 +50,7 @@ my $username = 'username';
 my $password = 'password';
 my %opts = (
     db     => 'db',
-    check  => 200,
+    check  => 20,
     init   => 0,
     input  => 'sample.xml',
     load   => 0,
@@ -84,7 +95,7 @@ if ( $opts{'report'} ) {
 }
 
 if ( $opts{'check'} ) {
-    my @posts = getUnchecked($opts{'check'});
+    my @posts = getUncheckedPotential($opts{'check'});
     check(@posts);
 }
 
@@ -92,7 +103,7 @@ if ( $opts{'load'} ) {
     load();
 }
 
-sub getUnchecked {
+sub getUncheckedPotential {
     my $limit = shift;
 
     my @unchecked;
