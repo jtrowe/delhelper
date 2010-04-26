@@ -76,7 +76,6 @@ my $schema = Schema->connect('dbi:SQLite:dbname=db', '', '');
 
 if ( $opts{'tags'} ) {
     tagReport();
-    exit;
 }
 
 if ( $opts{'report'} ) {
@@ -84,7 +83,7 @@ if ( $opts{'report'} ) {
 }
 
 if ( $opts{'check'} ) {
-    my @posts = getUnchecked2($opts{'check'});
+    my @posts = getUnchecked($opts{'check'});
     check(@posts);
 }
 
@@ -92,7 +91,7 @@ if ( $opts{'load'} ) {
     load();
 }
 
-sub getUnchecked2 {
+sub getUnchecked {
     my $limit = shift;
 
     my @unchecked;
@@ -118,7 +117,7 @@ sub getUnchecked2 {
     return @unchecked;
 }
 
-sub getChecked2 {
+sub getChecked {
     my $limit = shift || 100;
 
     my @checked;
@@ -209,11 +208,20 @@ sub file {
 sub load {
     my @COLS = qw( href time hash description tag extended meta );
 
-    my $file = file();
-
-    unless ( $file ) {
-        return;
+    my $file;
+    if ( $opts{'input'} ) {
+        $file = $opts{'input'};
     }
+    else {
+        $file = file();
+
+        unless ( $file ) {
+            return;
+        }
+    }
+
+    print 'Loading file ' . $file . "\n";
+
     my $parser = XML::DOM::Parser->new;
     my $doc = $parser->parsefile($file);
 
@@ -245,7 +253,7 @@ sub report {
     my $OUT;
     open $OUT, '>', $file;
     print $OUT q|<html><body><ul>|;
-    my @responses = getChecked2($limit);
+    my @responses = getChecked($limit);
 
     print 'Found ' . scalar(@responses) . ' posts for the report.' . "\n";
 
