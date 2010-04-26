@@ -27,13 +27,20 @@ my %opts = (
     check => 200,
     load => 0,
     report => 0,
+    tags => 0,
 );
 
 GetOptions(
     'check=i'  => \$opts{'check'},
     'load!'    => \$opts{'load'},
     'report=s' => \$opts{'report'},
+    'tags'     => \$opts{'tags'},
 );
+
+if ( $opts{'tags'} ) {
+    tagReport();
+    exit;
+}
 
 if ( $opts{'report'} ) {
     report($opts{'report'}, 30);
@@ -231,5 +238,24 @@ sub report {
         });
     }
     print $OUT q|</ul></body></html>|;
+}
+
+sub tagReport {
+    my %tags;
+
+    foreach my $post ( $schema->resultset('Post')->all ) {
+        foreach my $t ( split /\s+/, $post->tag ) {
+            $tags{$t} = 1;
+        }
+    }
+
+    my @tags = keys %tags;
+    my @endInS = grep { /s$/ } @tags;
+
+    print scalar(@tags) . ' unique tags' . "\n";
+
+    print scalar(@endInS) . ' in in "s":' . "\n";
+    print join('    ', @endInS) . "\n";
+
 }
 
