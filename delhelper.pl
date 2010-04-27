@@ -31,16 +31,6 @@ Joshua T. Rowe <jrowe@jrowe.org>
 =cut
 
 
-package Schema;
-
-use base qw( DBIx::Class::Schema::Loader );
-
-__PACKAGE__->loader_options(
-#    debug => 1
-);
-
-1;
-
 package main;
 
 use strict;
@@ -50,6 +40,8 @@ use Data::Dumper;
 use DBI;
 use File::Basename;
 use Getopt::Long;
+use Net::Delicious::Checker;
+use Net::Delicious::Checker::Schema;
 use XML::DOM::XPath;
 use LWP::UserAgent;
 
@@ -91,7 +83,8 @@ unless ( -e $opts{'db'} ) {
 
 }
 
-my $schema = Schema->connect('dbi:SQLite:dbname=' . $opts{'db'}, '', '');
+my $schema = Net::Delicious::Checker::Schema->connect(
+        'dbi:SQLite:dbname=' . $opts{'db'}, '', '');
 
 if ( $opts{'tags'} ) {
     tagReport();

@@ -1,11 +1,11 @@
-package Net::Delicious::Checker;
+package Net::Delicious::Checker::Schema;
 
 use warnings;
 use strict;
 
 =head1 NAME
 
-Net::Delicious::Checker - Checks delicious.com bookmarks.
+Net::Delicious::Checker::Schema - A DBIx::Class schema.
 
 =head1 VERSION
 
@@ -18,35 +18,18 @@ our $VERSION = '0.01';
 
 =head1 SYNOPSIS
 
-Quick summary of what the module does.
+The DBIx::Class schema for Net::Delicious::Checker.
 
-Perhaps a little code snippet.
-
-    use Net::Delicious::Checker;
-
-    my $foo = Net::Delicious::Checker->new();
-    ...
-
-=head1 EXPORT
-
-A list of functions that can be exported.  You can delete this section
-if you don't export anything, such as for a purely object-oriented module.
-
-=head1 SUBROUTINES/METHODS
-
-=head2 function1
+This is not meant to be used directly by the user.
 
 =cut
 
-sub function1 {
-}
+use base qw( DBIx::Class::Schema::Loader );
 
-=head2 function2
+__PACKAGE__->loader_options(
+#    debug => 1
+);
 
-=cut
-
-sub function2 {
-}
 
 =head1 AUTHOR
 
