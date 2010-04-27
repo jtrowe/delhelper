@@ -69,15 +69,7 @@ GetOptions(
 );
 
 unless ( -e $opts{'db'} ) {
-    my $tmp = "/tmp/init.sql";
-    open(OUT, '>', $tmp) or die($!);
-    foreach ( <DATA> ) {
-        print OUT;
-    }
-    close OUT;
-    system("sqlite3 $opts{'db'} < $tmp");
-    unlink $tmp;
-
+    Net::Delicious::Checker->initDataStore($opts{'db'});
 }
 
 my $schema = Net::Delicious::Checker::Schema->connect(
@@ -290,13 +282,4 @@ sub tagReport {
     print join('    ', @endInS) . "\n";
 
 }
-
-__DATA__
-CREATE TABLE file ( file text, processed int default 0 );
-CREATE TABLE post ( id integer primary key autoincrement, href not null
-unique, time text, hash text, description text, tag text, extended text,
-meta text );
-CREATE TABLE processed ( href text primary key );
-CREATE TABLE response ( id integer primary key autoincrement, href text,
-code integer, seconds1970 integer );
 

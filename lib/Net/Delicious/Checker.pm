@@ -81,6 +81,54 @@ sub load {
     });
 }
 
+
+=head2 initDataStore
+
+Initializes the data store.
+
+=cut
+
+sub initDataStore {
+    my ( $class, $name ) = @_;
+
+    my $sql = q|
+    CREATE TABLE file (
+        file text,
+        processed int default 0
+    );
+
+    CREATE TABLE post (
+        id integer primary key autoincrement,
+        href not null unique,
+        time text,
+        hash text,
+        description text,
+        tag text,
+        extended text,
+        meta text
+    );
+
+    CREATE TABLE processed (
+        href text primary key
+    );
+
+    CREATE TABLE response (
+        id integer primary key autoincrement,
+        href text,
+        code integer,
+        seconds1970 integer
+    );
+
+    |;
+
+    my $tmp = "/tmp/init.sql";
+    open(OUT, '>', $tmp) or die($!);
+    print OUT $sql;
+    close OUT;
+    system("sqlite3 $name < $tmp");
+    unlink $tmp;
+}
+
 =head1 AUTHOR
 
 Joshua T. Rowe, C<< <jrowe at jrowe.org> >>
