@@ -36,13 +36,10 @@ package main;
 use strict;
 use warnings;
 
-use Data::Dumper;
 use DBI;
-use File::Basename;
 use Getopt::Long;
 use Net::Delicious::Checker;
 use Net::Delicious::Checker::Schema;
-use XML::DOM::XPath;
 use LWP::UserAgent;
 
 my $username = 'username';
@@ -218,8 +215,6 @@ sub file {
 }
 
 sub load {
-    my @COLS = qw( href time hash description tag extended meta );
-
     my $file;
     if ( $opts{'input'} ) {
         $file = $opts{'input'};
@@ -234,36 +229,7 @@ sub load {
 
     print 'Loading file ' . $file . "\n";
 
-    my $parser = XML::DOM::Parser->new;
-    my $doc = $parser->parsefile($file);
-
-    my $years = {};
-
-    my @nodes = $doc->findnodes('/posts/post');
-    my $i = 0;
-    foreach ( @nodes ) {
-        my $args;
-        foreach my $c ( @COLS ) {
-            $args->{$c} = $_->getAttribute($c);
-        }
-
-        my $ok = eval {
-            $schema->resultset('Post')->create($args);
-            1;
-        };
-        if ( ( ! $ok ) || $@ ) {
-            print 'ERROR: Error inserting post [ ' . $@ . ' ]' . "\n";
-            print 'post: ' . Dumper($args) . "\n";
-        }
-
-    }
-
-    my ( $basename ) = fileparse($file);
-
-    $schema->resultset('File')->create({
-        file => $basename,
-        processed => 1,
-    });
+    Net::Delicious::Checker->load($schema, $file);
 }
 
 sub report {

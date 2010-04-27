@@ -3,6 +3,10 @@ package Net::Delicious::Checker;
 use warnings;
 use strict;
 
+use Data::Dumper;
+use File::Basename;
+use XML::DOM::XPath;
+
 =head1 NAME
 
 Net::Delicious::Checker - Checks delicious.com bookmarks.
@@ -34,18 +38,47 @@ if you don't export anything, such as for a purely object-oriented module.
 
 =head1 SUBROUTINES/METHODS
 
-=head2 function1
+=head2 load
+
+Loads a delicious.com XML file into the data store.
 
 =cut
 
-sub function1 {
-}
+sub load {
+    my ( $class, $schema, $file ) = @_;
 
-=head2 function2
+    my @COLS = qw( href time hash description tag extended meta );
 
-=cut
+    my $parser = XML::DOM::Parser->new;
+    my $doc = $parser->parsefile($file);
 
-sub function2 {
+    my $years = {};
+
+    my @nodes = $doc->findnodes('/posts/post');
+    my $i = 0;
+    foreach ( @nodes ) {
+        my $args;
+        foreach my $c ( @COLS ) {
+            $args->{$c} = $_->getAttribute($c);
+        }
+
+        my $ok = eval {
+            $schema->resultset('Post')->create($args);
+            1;
+        };
+        if ( ( ! $ok ) || $@ ) {
+            print 'ERROR: Error inserting post [ ' . $@ . ' ]' . "\n";
+            print 'post: ' . Dumper($args) . "\n";
+        }
+
+    }
+
+    my ( $basename ) = fileparse($file);
+
+    $schema->resultset('File')->create({
+        file => $basename,
+        processed => 1,
+    });
 }
 
 =head1 AUTHOR
