@@ -84,38 +84,11 @@ if ( $opts{'report'} ) {
 }
 
 if ( $opts{'check'} ) {
-    my @posts = getUncheckedPotential($opts{'check'});
-    check(@posts);
+    Net::Delicious::Checker->check($schema, $opts{'check'});
 }
 
 if ( $opts{'load'} ) {
     load();
-}
-
-sub getUncheckedPotential {
-    my $limit = shift;
-
-    my @unchecked;
-
-    my @posts = $schema->resultset('Post')->search(undef, {
-        order_by => 'random()'
-    });
-
-    foreach my $post ( @posts ) {
-        my $checked = $schema->resultset('Response')->search({
-            href => $post->href,
-        })->next;
-
-        unless ( $checked ) {
-            push @unchecked, $post;
-        }
-
-        if ( ( $limit ) && ( @unchecked >= $limit ) ) {
-            last;
-        }
-    }
-
-    return @unchecked;
 }
 
 sub getChecked {
@@ -160,29 +133,6 @@ sub getUnchecked {
             'NOT IN' => $rs->get_column('href')->as_query
         },
     );
-}
-
-sub check {
-    my $agent = LWP::UserAgent->new;
-    $agent->agent('Link Checker/0.10');
-    $agent->from('jrowe@jrowe.org');
-    $agent->max_redirect(0);
-    $agent->timeout(5);
-
-    print 'Checking ' . scalar(@_) . ' posts.' . "\n";
-
-    foreach ( @_ ) {
-        my $href = $_->href;
-        my $response = $agent->head($href);
-        my $code = $response->code;
-        $schema->resultset('Response')->create({
-            href        => $href,
-            code        => $code,
-            seconds1970 => time,
-        });
-
-        print $code . ' ' . $href . "\n";
-    }
 }
 
 sub file {

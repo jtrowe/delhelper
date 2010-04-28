@@ -129,6 +129,67 @@ sub initDataStore {
     unlink $tmp;
 }
 
+
+=head2 check
+
+Checks links for HTTP status.
+
+=cut
+
+sub check {
+    my ( $class, $schema, $limit ) = @_;
+
+    my @potential = $class->getUncheckedPotential($schema, $limit);
+
+    my $agent = LWP::UserAgent->new;
+    $agent->agent('Link Checker/0.10');
+    $agent->from('jrowe@jrowe.org');
+    $agent->max_redirect(0);
+    $agent->timeout(5);
+
+    print 'Checking ' . scalar(@potential) . ' posts.' . "\n";
+
+    foreach ( @potential ) {
+        my $href = $_->href;
+        my $response = $agent->head($href);
+        my $code = $response->code;
+        $schema->resultset('Response')->create({
+            href        => $href,
+            code        => $code,
+            seconds1970 => time,
+        });
+
+        print $code . ' ' . $href . "\n";
+    }
+}
+
+
+sub getUncheckedPotential {
+    my ( $class, $schema, $limit ) = @_;
+
+    my @unchecked;
+
+    my @posts = $schema->resultset('Post')->search(undef, {
+        order_by => 'random()'
+    });
+
+    foreach my $post ( @posts ) {
+        my $checked = $schema->resultset('Response')->search({
+            href => $post->href,
+        })->next;
+
+        unless ( $checked ) {
+            push @unchecked, $post;
+        }
+
+        if ( ( $limit ) && ( @unchecked >= $limit ) ) {
+            last;
+        }
+    }
+
+    return @unchecked;
+}
+
 =head1 AUTHOR
 
 Joshua T. Rowe, C<< <jrowe at jrowe.org> >>
