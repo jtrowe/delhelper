@@ -6,6 +6,7 @@ use strict;
 use Config::Simple;
 use Data::Dumper;
 use File::Basename;
+use LWP::UserAgent;
 use XML::DOM::XPath;
 
 =head1 NAME
@@ -69,6 +70,50 @@ sub new {
     }
 
     return $self;
+}
+
+
+=head2 config
+
+Returns the config object.
+
+=cut
+
+sub config {
+    my ( $self ) = @_;
+
+    return $self->{'config'};
+}
+
+
+=head2 fetch
+
+Fetch all of the delicious bookmarks.
+
+=cut
+
+sub fetch {
+    my ( $self, $file ) = @_;
+
+    my $url = 'https://api.del.icio.us/v1/posts/recent';
+
+    my $agent = LWP::UserAgent->new();
+    if ( my $email = $self->config->param('email') ) {
+        $agent->from($email);
+    }
+    $agent->agent(ref($self) . ' ' . $VERSION);
+
+    my $request = HTTP::Request->new(GET => $url);
+
+    $request->authorization_basic(
+            $self->config->param('username'), $self->config->param('password'));
+
+    my $response = $agent->request($request);
+
+    print $response->status_line . "\n";
+    print $response->as_string . "\n";
+
+    exit;
 }
 
 
