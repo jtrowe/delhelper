@@ -169,8 +169,6 @@ sub load {
         }
     }
 
-    print 'Loading file ' . $file . "\n";
-
     Net::Delicious::Checker->load($schema, $file);
 }
 

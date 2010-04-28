@@ -47,6 +47,8 @@ Loads a delicious.com XML file into the data store.
 sub load {
     my ( $class, $schema, $file ) = @_;
 
+    print 'Loading file ' . $file . "\n";
+
     my @COLS = qw( href time hash description tag extended meta );
 
     my $parser = XML::DOM::Parser->new;
