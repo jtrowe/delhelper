@@ -68,6 +68,8 @@ GetOptions(
     'password=s' => \$password,
 );
 
+Net::Delicious::Checker->new;
+
 unless ( -e $opts{'db'} ) {
     Net::Delicious::Checker->initDataStore($opts{'db'});
 }
