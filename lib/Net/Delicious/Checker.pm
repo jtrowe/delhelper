@@ -95,7 +95,7 @@ Fetch all of the delicious bookmarks.
 sub fetch {
     my ( $self, $file ) = @_;
 
-    my $url = 'https://api.del.icio.us/v1/posts/recent';
+    my $url = 'https://api.del.icio.us/v1/posts/all?meta=yes';
 
     my $agent = LWP::UserAgent->new();
     if ( my $email = $self->config->param('email') ) {
@@ -103,12 +103,12 @@ sub fetch {
     }
     $agent->agent(ref($self) . ' ' . $VERSION);
 
-    my $request = HTTP::Request->new(GET => $url);
-
-    $request->authorization_basic(
+    $agent->credentials(
+            'api.del.icio.us:443',
+            'del.icio.us API',
             $self->config->param('username'), $self->config->param('password'));
 
-    my $response = $agent->request($request);
+    my $response = $agent->get($url);
 
     print $response->status_line . "\n";
     print $response->as_string . "\n";
