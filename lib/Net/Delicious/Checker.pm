@@ -3,6 +3,7 @@ package Net::Delicious::Checker;
 use warnings;
 use strict;
 
+use Config::Simple;
 use Data::Dumper;
 use File::Basename;
 use XML::DOM::XPath;
@@ -18,7 +19,6 @@ Version 0.01
 =cut
 
 our $VERSION = '0.01';
-
 
 =head1 SYNOPSIS
 
@@ -36,7 +36,41 @@ Perhaps a little code snippet.
 A list of functions that can be exported.  You can delete this section
 if you don't export anything, such as for a purely object-oriented module.
 
+=cut
+
+my $CONFIG_FILE = $ENV{'HOME'} . '/.deliciouscheckerrc';
+
+
 =head1 SUBROUTINES/METHODS
+
+=head2 new
+
+Creates a new object.
+
+=cut
+
+sub new {
+    my ( $class ) = @_;
+
+    my $self = {
+    };
+
+    bless $self, $class;
+
+    if ( -e $CONFIG_FILE ) {
+        $self->{'config'} = Config::Simple->new($CONFIG_FILE);
+    }
+    else {
+        $self->{'config'} = Config::Simple->new(syntax => 'ini');
+        $self->{'config'}->param('username', '');
+        $self->{'config'}->param('password', '');
+        $self->{'config'}->param('email', '');
+        $self->{'config'}->write($CONFIG_FILE);
+    }
+
+    return $self;
+}
+
 
 =head2 load
 
