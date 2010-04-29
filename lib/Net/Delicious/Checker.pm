@@ -3,9 +3,11 @@ package Net::Delicious::Checker;
 use warnings;
 use strict;
 
+use Compress::Bzip2;
 use Config::Simple;
 use Data::Dumper;
 use File::Basename;
+use File::Path qw( make_path );
 use LWP::UserAgent;
 use XML::DOM::XPath;
 
@@ -93,9 +95,9 @@ Fetch all of the delicious bookmarks.
 =cut
 
 sub fetch {
-    my ( $self, $file ) = @_;
+    my ( $self ) = @_;
 
-    my $url = 'https://api.del.icio.us/v1/posts/all?meta=yes';
+    my $url = 'https://api.del.icio.us/v1/posts/recent?count=10';
 
     my $agent = LWP::UserAgent->new();
     if ( my $email = $self->config->param('email') ) {
@@ -111,9 +113,74 @@ sub fetch {
     my $response = $agent->get($url);
 
     print $response->status_line . "\n";
-    print $response->as_string . "\n";
+
+    if ( $response->is_success ) {
+        my $dir = $self->config->param('dir');
+        my $file = $dir . '/fetch.xml';
+
+        make_path($dir);
+
+        my $FH;
+        open($FH, '>', $file)
+                or die('Cannot write to "' . $file . '" : ' . $!);
+
+        print $FH $response->decoded_content;
+        print 'Wrote ' . $file . "\n";
+
+        close $FH;
+
+        $self->compressPrevious;
+    }
 
     exit;
+}
+
+
+=head2 compressPrevious
+
+Compress the previously downloaded XML files.
+
+=cut
+
+sub compressPrevious {
+    my ( $self ) = @_;
+
+    my $dir = $self->config->param('dir');
+
+    my $DIR;
+    opendir($DIR, $dir)
+            or die('Cannot read directory "' . $dir . '" : ' . $!);
+
+    foreach my $file ( grep { m/\.xml$/ } readdir $DIR ) {
+        my $ffile = $dir . '/' . $file;
+
+        print "Bzipping $ffile\n";
+
+        my $IN;
+        open($IN, '<', $ffile)
+            or die('Cannot read to "' . $ffile . '" : ' . $!);
+        my $content = join '', <$IN>;
+        close $IN;
+
+        my $ok = eval {
+            my $bzFile = $ffile . '.bz2';
+            my $bz = Compress::Bzip2->new;
+            $bz->bzopen($bzFile, 'w');
+            $bz->bzwrite($content);
+            $bz->bzclose;
+
+            1;
+        };
+        if ( ( ! $ok ) || $@ ) {
+            print "Error in bzipping " . $ffile . "\n";
+        }
+        else {
+            unlink $ffile;
+        }
+    }
+
+    closedir $DIR;
+
 }
 
 
