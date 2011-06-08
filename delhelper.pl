@@ -40,7 +40,10 @@ use DBI;
 use Getopt::Long;
 use Net::Delicious::Checker;
 use Net::Delicious::Checker::Schema;
+use Log4perl::Log qw( :easy );
 use LWP::UserAgent;
+
+Log4perl::Log->easy_init($INFO);
 
 my $username = 'username';
 my $password = 'password';
@@ -68,7 +71,7 @@ GetOptions(
     'password=s' => \$password,
 );
 
-Net::Delicious::Checker->new->fetch('fetch.xml');
+#Net::Delicious::Checker->new->fetch('fetch.xml');
 
 unless ( -e $opts{'db'} ) {
     Net::Delicious::Checker->initDataStore($opts{'db'});

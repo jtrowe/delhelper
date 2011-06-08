@@ -8,6 +8,7 @@ use Config::Simple;
 use Data::Dumper;
 use File::Basename;
 use File::Path qw( make_path );
+use Log4perl::Log qw( :easy );
 use LWP::UserAgent;
 use XML::DOM::XPath;
 
