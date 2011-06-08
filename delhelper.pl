@@ -40,10 +40,10 @@ use DBI;
 use Getopt::Long;
 use Net::Delicious::Checker;
 use Net::Delicious::Checker::Schema;
-use Log4perl::Log qw( :easy );
+use Log::Log4perl qw( :easy );
 use LWP::UserAgent;
 
-Log4perl::Log->easy_init($INFO);
+Log::Log4perl->easy_init($INFO);
 
 my $username = 'username';
 my $password = 'password';
@@ -154,7 +154,7 @@ sub file {
         processed => 1,
     })->next;
     if ( $file ) {
-        print 'File ' . $files[0] . ' already processed.' . "\n";
+        INFO 'File ' . $files[0] . ' already processed.' . "\n";
         return;
     }
 
@@ -186,7 +186,7 @@ sub report {
     print $OUT q|<html><body><ul>|;
     my @responses = getChecked($limit);
 
-    print 'Found ' . scalar(@responses) . ' posts for the report.' . "\n";
+    INFO 'Found ' . scalar(@responses) . ' posts for the report.' . "\n";
 
     foreach my $response ( @responses ) {
         my $code = $response->code;
@@ -229,10 +229,10 @@ sub tagReport {
     my @tags = keys %tags;
     my @endInS = grep { /s$/ } @tags;
 
-    print scalar(@tags) . ' unique tags' . "\n";
+    INFO scalar(@tags) . ' unique tags' . "\n";
 
-    print scalar(@endInS) . ' in in "s":' . "\n";
-    print join('    ', @endInS) . "\n";
+    INFO scalar(@endInS) . ' in in "s":' . "\n";
+    INFO join('    ', @endInS) . "\n";
 
 }
 

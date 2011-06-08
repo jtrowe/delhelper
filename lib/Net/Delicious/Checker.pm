@@ -8,7 +8,7 @@ use Config::Simple;
 use Data::Dumper;
 use File::Basename;
 use File::Path qw( make_path );
-use Log4perl::Log qw( :easy );
+use Log::Log4perl qw( :easy );
 use LWP::UserAgent;
 use XML::DOM::XPath;
 
@@ -113,7 +113,7 @@ sub fetch {
 
     my $response = $agent->get($url);
 
-    print $response->status_line . "\n";
+    INFO $response->status_line . "\n";
 
     if ( $response->is_success ) {
         my $dir = $self->config->param('dir');
@@ -126,7 +126,7 @@ sub fetch {
                 or die('Cannot write to "' . $file . '" : ' . $!);
 
         print $FH $response->decoded_content;
-        print 'Wrote ' . $file . "\n";
+        INFO 'Wrote ' . $file . "\n";
 
         close $FH;
 
@@ -155,7 +155,7 @@ sub compressPrevious {
     foreach my $file ( grep { m/\.xml$/ } readdir $DIR ) {
         my $ffile = $dir . '/' . $file;
 
-        print "Bzipping $ffile\n";
+        INFO "Bzipping $ffile\n";
 
         my $IN;
         open($IN, '<', $ffile)
@@ -173,7 +173,7 @@ sub compressPrevious {
             1;
         };
         if ( ( ! $ok ) || $@ ) {
-            print "Error in bzipping " . $ffile . "\n";
+            ERROR "Error in bzipping " . $ffile . "\n";
         }
         else {
             unlink $ffile;
@@ -194,7 +194,7 @@ Loads a delicious.com XML file into the data store.
 sub load {
     my ( $class, $schema, $file ) = @_;
 
-    print 'Loading file ' . $file . "\n";
+    INFO 'Loading file ' . $file . "\n";
 
     my @COLS = qw( href time hash description tag extended meta );
 
@@ -216,8 +216,8 @@ sub load {
             1;
         };
         if ( ( ! $ok ) || $@ ) {
-            print 'ERROR: Error inserting post [ ' . $@ . ' ]' . "\n";
-            print 'post: ' . Dumper($args) . "\n";
+            ERROR 'ERROR: Error inserting post [ ' . $@ . ' ]' . "\n";
+            ERROR 'post: ' . Dumper($args) . "\n";
         }
 
     }
@@ -296,7 +296,7 @@ sub check {
     $agent->max_redirect(0);
     $agent->timeout(5);
 
-    print 'Checking ' . scalar(@potential) . ' posts.' . "\n";
+    INFO 'Checking ' . scalar(@potential) . ' posts.' . "\n";
 
     foreach ( @potential ) {
         my $href = $_->href;
@@ -308,7 +308,7 @@ sub check {
             seconds1970 => time,
         });
 
-        print $code . ' ' . $href . "\n";
+        INFO $code . ' ' . $href . "\n";
     }
 }
 
