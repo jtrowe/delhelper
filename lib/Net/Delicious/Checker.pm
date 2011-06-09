@@ -211,6 +211,8 @@ sub load {
             $args->{$c} = $_->getAttribute($c);
         }
 
+        $args->{'inserted_at'} = gmtime;
+
         my $ok = eval {
             $schema->resultset('Post')->create($args);
             1;
@@ -248,13 +250,14 @@ sub initDataStore {
 
     CREATE TABLE post (
         id integer primary key autoincrement,
-        href not null unique,
+        href not null,
         time text,
         hash text,
         description text,
         tag text,
         extended text,
-        meta text
+        meta text,
+        inserted_at integer
     );
 
     CREATE TABLE processed (

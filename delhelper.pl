@@ -49,7 +49,7 @@ my $username = 'username';
 my $password = 'password';
 my %opts = (
     db     => 'db',
-    check  => 20,
+    check  => 0,
     init   => 0,
     input  => 'sample.xml',
     load   => 0,
@@ -65,6 +65,7 @@ GetOptions(
     'check=i'    => \$opts{'check'},
     'load!'      => \$opts{'load'},
     'report=s'   => \$opts{'report'},
+    'report-count=i' => \$opts{'report-count'},
     'tags'       => \$opts{'tags'},
 
     'username=s' => \$username,
@@ -85,7 +86,7 @@ if ( $opts{'tags'} ) {
 }
 
 if ( $opts{'report'} ) {
-    report($opts{'report'}, 30);
+    report($opts{'report'}, $opts{'report-count'});
 }
 
 if ( $opts{'check'} ) {
@@ -226,7 +227,7 @@ sub tagReport {
         }
     }
 
-    my @tags = keys %tags;
+    my @tags = sort keys %tags;
     my @endInS = grep { /s$/ } @tags;
 
     INFO scalar(@tags) . ' unique tags' . "\n";
