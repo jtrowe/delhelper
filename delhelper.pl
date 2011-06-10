@@ -45,6 +45,8 @@ use LWP::UserAgent;
 
 Log::Log4perl->easy_init($INFO);
 
+WARN 'Old tags are being returned in the tag report.';
+
 my $username = 'username';
 my $password = 'password';
 my %opts = (
@@ -222,6 +224,10 @@ sub tagReport {
     my %tags;
 
     foreach my $post ( $schema->resultset('Post')->all ) {
+        unless ( $post->deleted ) {
+            next;
+        }
+
         foreach my $t ( split /\s+/, $post->tag ) {
             $tags{$t} = 1;
         }

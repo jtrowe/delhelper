@@ -201,6 +201,11 @@ sub load {
     my $parser = XML::DOM::Parser->new;
     my $doc = $parser->parsefile($file);
 
+    foreach my $post ( $schema->resultset('Post')->all ) {
+        $post->deleted(1);
+        $post->update;
+    }
+
     my $years = {};
 
     my @nodes = $doc->findnodes('/posts/post');
@@ -212,14 +217,37 @@ sub load {
         }
 
         $args->{'inserted_at'} = gmtime;
+        $args->{'deleted'} = 0;
 
-        my $ok = eval {
-            $schema->resultset('Post')->create($args);
-            1;
-        };
-        if ( ( ! $ok ) || $@ ) {
-            ERROR 'ERROR: Error inserting post [ ' . $@ . ' ]' . "\n";
-            ERROR 'post: ' . Dumper($args) . "\n";
+        my @posts = $schema->resultset('Post')->search({
+            href => $args->{'href'},
+        });
+foreach my $p ( @posts ) {
+#    INFO 'Found ' . $p->href;
+    my $dirty = ( $p->tag ne $args->{'tag'} )
+            || ( $p->description ne $args->{'description'} )
+            || ( $p->extended ne $args->{'extended'} );
+
+    if ( $dirty ) {
+        $p->tag($args->{'tag'});
+        $p->description($args->{'description'});
+        $p->extended($args->{'extended'});
+        $p->deleted(0);
+        $p->update;
+
+    INFO 'Updating ' . $p->href;
+    }
+}
+
+        unless ( @posts ) {
+            my $ok = eval {
+                $schema->resultset('Post')->create($args);
+                1;
+            };
+            if ( ( ! $ok ) || $@ ) {
+                ERROR 'ERROR: Error inserting post [ ' . $@ . ' ]' . "\n";
+                ERROR 'post: ' . Dumper($args) . "\n";
+            }
         }
 
     }
@@ -257,7 +285,8 @@ sub initDataStore {
         tag text,
         extended text,
         meta text,
-        inserted_at integer
+        inserted_at integer,
+        deleted integer
     );
 
     CREATE TABLE processed (
