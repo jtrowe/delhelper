@@ -69,6 +69,7 @@ GetOptions(
     'report=s'   => \$opts{'report'},
     'report-count=i' => \$opts{'report-count'},
     'tags'       => \$opts{'tags'},
+    'list=s'     => \$opts{'list'},
 
     'username=s' => \$username,
     'password=s' => \$password,
@@ -82,6 +83,10 @@ unless ( -e $opts{'db'} ) {
 
 my $schema = Net::Delicious::Checker::Schema->connect(
         'dbi:SQLite:dbname=' . $opts{'db'}, '', '');
+
+if ( $opts{'list'} ) {
+    listByTags(split /,/, $opts{'list'});
+}
 
 if ( $opts{'tags'} ) {
     tagReport();
@@ -224,7 +229,7 @@ sub tagReport {
     my %tags;
 
     foreach my $post ( $schema->resultset('Post')->all ) {
-        unless ( $post->deleted ) {
+        if ( $post->deleted ) {
             next;
         }
 
@@ -240,6 +245,24 @@ sub tagReport {
 
     INFO scalar(@endInS) . ' in in "s":' . "\n";
     INFO join('    ', @endInS) . "\n";
+
+}
+
+sub listByTags {
+    my %target = map { $_ => 1 } @_;
+
+    my @hrefs;
+    foreach my $post ( $schema->resultset('Post')->all ) {
+        if ( $post->deleted ) {
+            next;
+        }
+
+        foreach my $t ( split /\s+/, $post->tag ) {
+            if ( $target{$t} ) {
+                INFO $t . ' => ' . $post->href;
+            }
+        }
+    }
 
 }
 
