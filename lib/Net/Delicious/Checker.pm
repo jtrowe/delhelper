@@ -214,6 +214,10 @@ sub load {
         my $args;
         foreach my $c ( @COLS ) {
             $args->{$c} = $_->getAttribute($c);
+
+            if ( $c eq 'meta' ) {
+                $args->{'mmeta'} = delete $args->{'meta'};
+            }
         }
 
         $args->{'inserted_at'} = gmtime;
@@ -284,7 +288,7 @@ sub initDataStore {
         description text,
         tag text,
         extended text,
-        meta text,
+        mmeta text,
         inserted_at integer,
         deleted integer
     );
