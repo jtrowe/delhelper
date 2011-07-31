@@ -36,6 +36,8 @@ package main;
 use strict;
 use warnings;
 
+use lib 'lib';
+
 use DBI;
 use Getopt::Long;
 use Net::Delicious::Checker;
