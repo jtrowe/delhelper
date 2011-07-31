@@ -26,6 +26,9 @@ This is not meant to be used directly by the user.
 
 use base qw( DBIx::Class::Schema::Loader );
 
+__PACKAGE__->use_namespaces(1);
+__PACKAGE__->naming('v7');
+
 __PACKAGE__->loader_options(
 #    debug => 1
 );
